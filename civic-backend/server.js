@@ -73,8 +73,9 @@ mongoose
   })
   .then(() => {
     console.log('MongoDB connected successfully');
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log(`Server accessible at http://192.168.1.11:${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV}`);
     });
   })
