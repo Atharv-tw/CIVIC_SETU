@@ -234,3 +234,12 @@ GoogleService-Info.plist
 # Documentation builds (if you generate docs locally)
 docs/_build/
 site/
+
+# ========================================
+# INTERNAL DOCUMENTATION (DO NOT COMMIT)
+# ========================================
+
+# Internal development notes
+docs/internal/
+manualtestingbugs.md
+CREDENTIAL_ROTATION.md
