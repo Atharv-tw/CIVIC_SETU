@@ -14,6 +14,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo.png';
 
 const MotionPaper = motion(Paper);
 const MotionButton = motion(Button);
@@ -122,6 +123,20 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <motion.img
+                src={logo}
+                alt="Civic Setu"
+                style={{ height: 80, width: 'auto' }}
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: 'loop',
+                  ease: 'easeInOut'
+                }}
+              />
+            </Box>
             <Typography
               component="h1"
               variant="h4"
