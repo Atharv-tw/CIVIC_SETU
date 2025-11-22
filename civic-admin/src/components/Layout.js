@@ -18,6 +18,7 @@ import {
   MenuItem,
   Tooltip
 } from '@mui/material';
+import logo from '../assets/logo.png';
 import {
   Menu as MenuIcon,
   Dashboard,
@@ -73,9 +74,12 @@ const Layout = () => {
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Civic Setu Admin
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <img src={logo} alt="Civic Setu" style={{ height: 40, width: 'auto' }} />
+          <Typography variant="h6" noWrap component="div">
+            Civic Setu
+          </Typography>
+        </Box>
       </Toolbar>
       <Divider />
       <List>
