@@ -6,20 +6,27 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator
+  ActivityIndicator,
+  TextInput,
+  StatusBar
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { getStatusColor, getStatusLabel } from '../../constants/reportStatus';
 import reportService from '../../services/reportService';
 import { showErrorAlert } from '../../utils/errorHandler';
 
 const MyReportsScreen = ({ navigation }) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
   const [reports, setReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchReports();
@@ -45,6 +52,7 @@ const MyReportsScreen = ({ navigation }) => {
         }));
 
         setReports(transformedReports);
+        setFilteredReports(transformedReports);
       } else {
         console.error('Failed to fetch reports:', result.message);
         const errorMsg = result.message?.includes('token') || result.message?.includes('authorized')
@@ -52,6 +60,7 @@ const MyReportsScreen = ({ navigation }) => {
           : result.message || 'Failed to fetch reports';
         setError(errorMsg);
         setReports([]);
+        setFilteredReports([]);
       }
     } catch (error) {
       console.error('Error fetching reports:', error);
@@ -62,11 +71,27 @@ const MyReportsScreen = ({ navigation }) => {
         : 'Failed to load reports. Please try again.';
       setError(errorMessage);
       setReports([]);
+      setFilteredReports([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = reports.filter(
+        (report) =>
+          report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredReports(filtered);
+    } else {
+      setFilteredReports(reports);
+    }
+  }, [searchQuery, reports]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -151,6 +176,23 @@ const MyReportsScreen = ({ navigation }) => {
       );
     }
 
+    if (searchQuery && reports.length > 0) {
+      return (
+        <View style={styles.emptyState}>
+          <MaterialCommunityIcons
+            name="file-search-outline"
+            size={64}
+            color={theme.colors.text.tertiary}
+          />
+          <Text style={[styles.emptyStateText, { color: theme.colors.text.primary }]}>No Results Found</Text>
+          <Text style={[styles.emptyStateSubtext, { color: theme.colors.text.secondary }]}>
+            No reports match "{searchQuery}".{"\n"}
+            Try a different search term.
+          </Text>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.emptyStateContainer}>
         <View style={[styles.emptyStateHeader, {
@@ -189,8 +231,44 @@ const MyReportsScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="#ffffff"
+      />
+
+      {/* Header */}
+      <View style={[styles.simpleHeader, { paddingTop: insets.top }]}>
+        <Text style={styles.simpleHeaderTitle}>My Reports</Text>
+      </View>
+
+      <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.primary }]}>
+        <View style={[styles.searchInputContainer, { backgroundColor: theme.colors.surface.primary }]}>
+          <MaterialCommunityIcons
+            name="magnify"
+            size={20}
+            color={theme.colors.text.secondary}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.searchInput, { color: theme.colors.text.primary }]}
+            placeholder="Search my reports..."
+            placeholderTextColor={theme.colors.text.tertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <MaterialCommunityIcons
+                name="close-circle"
+                size={20}
+                color={theme.colors.text.secondary}
+              />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
       <FlatList
-        data={reports}
+        data={filteredReports}
         renderItem={renderReportItem}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={renderEmptyState}
@@ -202,7 +280,7 @@ const MyReportsScreen = ({ navigation }) => {
             tintColor={theme.colors.primary.main}
           />
         }
-        contentContainerStyle={reports.length === 0 ? styles.emptyContainer : undefined}
+        contentContainerStyle={filteredReports.length === 0 ? styles.emptyContainer : styles.listContent}
       />
     </View>
   );
@@ -211,6 +289,49 @@ const MyReportsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  simpleHeader: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  simpleHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  listContent: {
+    paddingBottom: 16,
   },
   loadingContainer: {
     flex: 1,

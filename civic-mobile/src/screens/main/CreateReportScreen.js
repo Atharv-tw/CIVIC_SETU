@@ -738,27 +738,37 @@ const CreateReportScreen = ({ navigation }) => {
 
         <View style={styles.navigationButtons}>
           {currentStep > 0 && (
-            <AnimatedButton
+            <TouchableOpacity
               onPress={handlePrevious}
-              variant="outline"
-              style={[styles.navButton, { marginRight: 12 }]}
+              style={[styles.arrowButton, {
+                backgroundColor: theme.colors.surface.primary,
+                borderColor: theme.colors.primary.main,
+                borderWidth: 1.5
+              }]}
             >
-              <Text style={[styles.buttonText, { color: theme.colors.primary.main }]}>
-                Previous
-              </Text>
-            </AnimatedButton>
+              <MaterialCommunityIcons
+                name="chevron-left"
+                size={28}
+                color={theme.colors.primary.main}
+              />
+            </TouchableOpacity>
           )}
 
+          <View style={{ flex: 1 }} />
+
           {currentStep < steps.length - 1 && (
-            <AnimatedButton
+            <TouchableOpacity
               onPress={handleNext}
-              variant="primary"
-              style={[styles.navButton, { flex: 1 }]}
+              style={[styles.arrowButton, {
+                backgroundColor: theme.colors.primary.main
+              }]}
             >
-              <Text style={[styles.buttonText, { color: theme.colors.text.contrast }]}>
-                Next
-              </Text>
-            </AnimatedButton>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={28}
+                color={theme.colors.text.contrast}
+              />
+            </TouchableOpacity>
           )}
         </View>
       </KeyboardAvoidingView>
@@ -1059,11 +1069,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: 'transparent',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  navButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+  arrowButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   buttonText: {
     fontSize: 16,

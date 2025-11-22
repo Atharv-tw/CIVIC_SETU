@@ -13,7 +13,6 @@ import {
   Dimensions,
   StatusBar,
   Platform,
-  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -40,7 +39,6 @@ const HomeScreen = ({ navigation }) => {
   const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [stats, setStats] = useState({
@@ -148,27 +146,8 @@ const HomeScreen = ({ navigation }) => {
     fetchStats();
   };
 
-  const filterReports = () => {
-    // For search, filter locally from current reports
-    if (searchQuery) {
-      let filtered = [...reports].filter(
-        (report) =>
-          report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          report.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredReports(filtered);
-    } else {
-      setFilteredReports(reports);
-    }
-  };
-
   useEffect(() => {
-    filterReports();
-  }, [searchQuery, reports]);
-
-  useEffect(() => {
-    // Fetch data when filters change (not search)
+    // Fetch data when filters change
     fetchReports({ status: selectedStatus, category: selectedCategory });
   }, [selectedCategory, selectedStatus]);
 
@@ -354,30 +333,7 @@ const HomeScreen = ({ navigation }) => {
 
   const renderSearchAndFilters = () => (
     <Animatable.View animation="fadeInUp" delay={600} style={styles.searchContainer}>
-      <View style={[styles.searchInputContainer, { backgroundColor: theme.colors.surface.primary }]}>
-        <MaterialCommunityIcons
-          name="magnify"
-          size={20}
-          color={theme.colors.text.secondary}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={[styles.searchInput, { color: theme.colors.text.primary }]}
-          placeholder="Search reports..."
-          placeholderTextColor={theme.colors.text.tertiary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-            <MaterialCommunityIcons
-              name="close-circle"
-              size={20}
-              color={theme.colors.text.secondary}
-            />
-          </TouchableOpacity>
-        ) : null}
-      </View>
+      <View style={styles.whitespace} />
 
       <ScrollView
         horizontal
@@ -513,7 +469,7 @@ const HomeScreen = ({ navigation }) => {
                 style={{ alignSelf: 'center', marginBottom: theme.spacing.md }}
               />
               <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
-                {searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all'
+                {selectedCategory !== 'all' || selectedStatus !== 'all'
                   ? 'No reports match your filters'
                   : 'No reports found'}
               </Text>
@@ -528,7 +484,7 @@ const HomeScreen = ({ navigation }) => {
                 showsVerticalScrollIndicator={false}
               />
               {/* Show "See More" button when showing limited results (no filters) */}
-              {selectedStatus === 'all' && selectedCategory === 'all' && !searchQuery && filteredReports.length === 15 && (
+              {selectedStatus === 'all' && selectedCategory === 'all' && filteredReports.length === 15 && (
                 <TouchableOpacity
                   style={[styles.seeMoreButton, { borderColor: theme.colors.primary.main }]}
                   onPress={() => navigation.navigate('AllReports')}
@@ -604,37 +560,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 16,
+  whitespace: {
+    height: 20,
     marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-      web: {
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-      },
-    }),
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 16,
-    fontSize: 16,
-  },
-  clearButton: {
-    padding: 4,
   },
   filtersContainer: {
     marginBottom: 8,
